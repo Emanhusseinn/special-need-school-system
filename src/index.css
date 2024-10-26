@@ -1,13 +1,234 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+
+#root{
+  direction: rtl;
+}
+.form-submit {
+  background: #f3f3f9;
+  padding: 25px;
+  border: 2px solid #dadaff;
+  border-radius: 14px;
+  margin: 2rem 0;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.form-submit .form-label{
+  font-weight: bold;
+  margin-top: 21px;
+}
+.form-btn{
+    text-align: center;
+}
+.form-btn .save-btn{
+  background: #e6e6f5;
+  color: black;
+  font-weight: bold;
+  margin-top: 2rem;
+  border: 3px solid #dadaff;
+  padding: 11px;
+  width: 30%;
+  border-radius: 11px;
+}
+
+.nav-system{
+  background: #dadaff;
+  padding: 20px 20px 0;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.nav-item {
+  font-weight: bold;
+  font-size: 20px;
+}
+.nav-link{
+  color: black !important;
+}
+
+.form-control{
+    border: 2px solid #dadaff !important;
+    padding: 11px !important;
+}
+
+.student-name{
+  font-size: 21px;
+  font-weight: bold;
+  margin-bottom: 0;
+  text-align: center;
+}
+
+.student-card {
+  background: #f3f3f9;
+  display: flex;
+  justify-content: space-between; /* Create space between student info and file download */
+  padding: 1.5rem;
+  border: 3px solid #dadaff;
+  border-radius: 15px;
+  margin-top: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Add shadow for a lifted effect */
+  transition: transform 0.2s, box-shadow 0.2s;
+  flex-direction: column;
+}
+
+
+.student-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.student-photo{
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    font-size: 24px;
+    align-items: center;
+    font-weight: bold;
+    background: #ffffff;
+    padding: 11px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 11px;
+    border-bottom: 4px solid #dadaff;
+}
+
+.student-photo svg{
+  width: 50px;
+  height: 100%;
+  border-radius: 50%;
+  background-color: #ffffff;
+  background-size: cover;
+  background-position: center;
+  padding: 14px;
+  border: 1px solid;
+  color: #dadaff;
+}
+
+.student-info {
+  font-size: 16px;
+  color: #555;
+}
+
+.student-info p {
+  margin: 5px 0;
+}
+
+.file-section {
+  text-align: center;
+}
+
+.file-icon {
+  font-size: 30px;
+  color: #3ca4dc;
+  margin-bottom: 0.5rem;
+}
+
+.download-btn {
+  background-color: #3ca4dc;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  text-transform: uppercase;
+  transition: background-color 0.2s;
+}
+
+.download-btn:hover {
+  background-color: #2b307f;
+}
+.plan-type{
+    display: flex;
+    justify-content: space-around;
+}
+
+
+.student-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 1rem;
+  font-size: 16.5px;
+  color: #555;
+  padding: 25px 0;
+}
+
+.student-info-grid div {
+  line-height: 1.5;
+  gap: 11px;
+  display: flex;
+}
+
+.photo-upload-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-color: #dadaff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0px auto;
+  cursor: pointer;
+  border: 2px solid #ddd;
+  transition: border-color 0.3s;
+}
+
+.photo-upload-circle:hover {
+  border-color: #3ca4dc;
+}
+
+.icon-placeholder {
+  font-size: 60px;
+  color: #a0a0a5;
+}
+
+.uploaded-photo {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.photo-upload-circle-display {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-color: #dadaff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0px;
+  cursor: pointer;
+  border: 2px solid #ddd;
+  transition: border-color 0.3s;
+}
+
+
+.photo-name{
+    display: flex;
+    align-items: center;
+    gap:1rem;
+    /* justify-content: space-evenly; */
+}
+@media screen and (max-width:580px) {
+  .student-card {
+    padding: 0.5rem;
+    flex-direction: column;
+}
+
+.student-name {
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+
+.student-info-grid {
+  grid-template-columns: 1fr;
+  gap: 0.5rem 0rem;
+}
+
+.student-photo {
+    overflow-wrap: anywhere;
+}
+
+.form-btn .save-btn {
+  width: 100%;
+}
+  
 }
