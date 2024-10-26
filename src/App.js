@@ -44,11 +44,12 @@ function App() {
 
   const handleCloseModal = () => setShowModal(false);
 
-  // Filter students based on the search term
-  const filteredStudents = students.filter(student =>
-    student.studentName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
+// Filter students based on the search term across all fields
+const filteredStudents = students.filter(student => {
+  // Combine all properties of the student object into a single searchable string
+  const studentData = Object.values(student).join(' ').toLowerCase();
+  return studentData.includes(searchTerm.toLowerCase());
+});
   // If not logged in, show the Login Page
   if (!isLoggedIn) {
     return <LoginPage onLogin={handleLogin} />;
