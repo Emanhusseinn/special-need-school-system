@@ -1,10 +1,10 @@
-// App.js
 import React, { useState, useEffect } from 'react';
 import { Container, Modal, Button, Row, Col, Form, Nav } from 'react-bootstrap';
 import InputForm from './pages/InputForm';
 import LoginPage from './LoginPage';
-import { getFromLocalStorage, saveToLocalStorage } from './utils/localStorage';
+import { getFromLocalStorage, saveToLocalStorage, getIsLoggedIn, setIsSignedIn } from './utils/localStorage';
 import { BsPersonCircle } from "react-icons/bs";
+import { updateStudent, deleteStudent } from './utils/localStorage'; // Import new utilities
 
 function App() {
   const [students, setStudents] = useState([]);
@@ -13,80 +13,128 @@ function App() {
   const [activeTab, setActiveTab] = useState('add');
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showAttachmentsModal, setShowAttachmentsModal] = useState(false);
+  const [selectedAttachments, setSelectedAttachments] = useState([]);
+  const [editMode, setEditMode] = useState(false);
+  const [currentStudent, setCurrentStudent] = useState(null);
 
-  // Load login status and students from local storage when the component mounts
+  // Function to open the modal and set the selected attachments
+  const handleShowAttachments = (attachments) => {
+    setSelectedAttachments(attachments);
+    setShowAttachmentsModal(true);
+  };
+
+  // Function to close the modal
+  const handleCloseAttachmentsModal = () => setShowAttachmentsModal(false);
+
   useEffect(() => {
-    const savedStudents = getFromLocalStorage('students') || [];
-    setStudents(savedStudents.reverse());
-    
-    const savedLoginStatus = getFromLocalStorage('isLoggedIn');
+    getFromLocalStorage('students', (fetchedStudents) => {
+      if (fetchedStudents) {
+        setStudents(fetchedStudents);
+      }
+    });
+  
+    const savedLoginStatus = getIsLoggedIn('isLoggedIn');
     setIsLoggedIn(savedLoginStatus === "true");
   }, []);
 
   // Handle successful login
   const handleLogin = () => {
     setIsLoggedIn(true);
-    saveToLocalStorage('isLoggedIn', "true"); // Save login status
+    setIsSignedIn('isLoggedIn', "true"); // Save login status
   };
 
   // Handle logout
   const handleLogout = () => {
     setIsLoggedIn(false);
-    saveToLocalStorage('isLoggedIn', "false"); // Clear login status
+    setIsSignedIn('isLoggedIn', "false"); // Clear login status
   };
 
   // Handle adding a new student
-  const handleAddStudent = (updatedStudents) => {
-    setStudents(updatedStudents.reverse());
-    setLastAddedStudent(updatedStudents[0]);
+  const handleAddStudent = (newStudent) => {
+    setStudents(prev => [newStudent, ...prev]);
     setShowModal(true);
   };
 
   const handleCloseModal = () => setShowModal(false);
 
-// Filter students based on the search term across all fields
-const filteredStudents = students.filter(student => {
-  // Combine all properties of the student object into a single searchable string
-  const studentData = Object.values(student).join(' ').toLowerCase();
-  return studentData.includes(searchTerm.toLowerCase());
-});
+  // Start edit mode with selected student data
+  const handleEditStudent = (student) => {
+    setEditMode(true);
+    setCurrentStudent(student);
+    setActiveTab("add");
+  };
+
+  // Save updated student data
+  const handleSaveStudent = async (updatedStudent) => {
+    await updateStudent('students', updatedStudent.id, updatedStudent);
+    setStudents(prev => prev.map(stud => stud.id === updatedStudent.id ? updatedStudent : stud));
+    setEditMode(false);
+    setCurrentStudent(null);
+  };
+  const handleDeleteStudent = async (studentId) => {
+    console.log("Attempting to delete student with ID:", studentId);
+  
+    // Perform deletion
+    const response = await deleteStudent("students", studentId);
+  
+    if (response.success) {
+      console.log("Student deleted successfully from Supabase.");
+  
+      // Force a data refresh by fetching students again
+      getFromLocalStorage('students', (fetchedStudents) => {
+        setStudents(fetchedStudents);
+        console.log("Data refreshed after deletion:", fetchedStudents);
+      });
+    } else {
+      console.error("Failed to delete student. Error:", response.error);
+      alert("Failed to delete student due to an error. Please try again.");
+    }
+  };
+  
+
+  // Filter students based on the search term
+  const filteredStudents = students.filter(student => {
+    const studentData = Object.values(student).join(' ').toLowerCase();
+    return studentData.includes(searchTerm.toLowerCase());
+  });
+
   // If not logged in, show the Login Page
   if (!isLoggedIn) {
     return <LoginPage onLogin={handleLogin} />;
   }
 
-  // Main app content when logged in
   return (
     <Container>
-      {/* Header with Tabs and Logout Button */}
       <Nav variant="tabs" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey)} className='nav-system'>
         <Nav.Item>
-          <Nav.Link eventKey="add">إضافة طالب</Nav.Link>
+          <Nav.Link eventKey="add">{editMode ? "تعديل طالب" : "إضافة طالب"}</Nav.Link>
         </Nav.Item>
         <Nav.Item>
           <Nav.Link eventKey="list">كل الطلاب</Nav.Link>
         </Nav.Item>
         <Nav.Item className="ml-auto">
-          <Button variant="mt-3 btn btn-primary" onClick={handleLogout}>
-            تسجيل الخروج
-          </Button>
+          <Button variant="mt-3 btn btn-primary" onClick={handleLogout}>تسجيل الخروج</Button>
         </Nav.Item>
       </Nav>
 
-      {/* Tab Content */}
       {activeTab === 'add' && (
         <div>
-          <h1>إضافة طالب</h1>
-          <InputForm onAddStudent={handleAddStudent} />
+          <h1>{editMode ? "تعديل الطالب" : "إضافة طالب"}</h1>
+          <InputForm 
+            onAddStudent={handleAddStudent} 
+            editMode={editMode}
+            currentStudent={currentStudent}
+            onSaveStudent={handleSaveStudent}
+            onCancelEdit={() => { setEditMode(false); setCurrentStudent(null); }}
+          />
         </div>
       )}
 
       {activeTab === 'list' && (
         <div>
           <h1>كل الطلاب</h1>
-
-          {/* Search Bar */}
-          <Form.Group controlId="search">
+          <Form.Group controlId="search" className='search-bar'>
             <Form.Control
               type="text"
               placeholder="ابحث عن الطالب"
@@ -94,15 +142,13 @@ const filteredStudents = students.filter(student => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </Form.Group>
-
-          {/* Display Students */}
           <div className="student-list">
+            <p className="count-btn">عدد الطلاب: {filteredStudents.length}</p>
             <Row>
               {filteredStudents.map((student, index) => (
                 <Col md={6} sm={12} key={index} className="mb-4">
                   <div className="student-card">
                     <div className="student-details">
-                      {/* Student Info and Photo */}
                       <div className="photo-name">
                         <div className="photo-upload-circle-display">
                           {student.studentPhoto ? (
@@ -118,7 +164,6 @@ const filteredStudents = students.filter(student => {
                         <p className="student-name">{student.studentName}</p>
                       </div>
 
-                      {/* Student Info */}
                       <div className="student-info">
                         <div className="student-info-grid">
                           <div><strong>نوع الخطة:</strong> {student.planType}</div>
@@ -137,15 +182,22 @@ const filteredStudents = students.filter(student => {
                       </div>
                     </div>
 
-                    {/* File Download Section */}
-                    {student.attachedFile && (
-                      <div className="file-section">
-                        <i className="fas fa-file-alt file-icon"></i>
-                        <a href={student.attachedFile} download={student.attachedFileName}>
-                          <button className="download-btn">تحميل {student.attachedFileName}</button>
-                        </a>
-                      </div>
+                    {student.attachedFiles && student.attachedFiles.length > 0 ? (
+                      <button
+                        className="download-btn"
+                        onClick={() => handleShowAttachments(student.attachedFiles)}
+                      >
+                        ملفات الطالب
+                      </button>
+                    ) : (
+                      <p className="count-btn">لا يوجد ملفات للطالب</p>
                     )}
+
+                    {/* Edit and Delete Buttons */}
+                    {/* <div className="student-actions">
+                      <Button variant="warning" onClick={() => handleEditStudent(student)}>تعديل</Button>
+                      <Button variant="danger" onClick={() => handleDeleteStudent(student.id)}>حذف</Button>
+                    </div> */}
                   </div>
                 </Col>
               ))}
@@ -154,18 +206,35 @@ const filteredStudents = students.filter(student => {
         </div>
       )}
 
-      {/* Success Modal */}
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
           <Modal.Title>تم حفظ الطالب بنجاح</Modal.Title>
         </Modal.Header>
+        <Modal.Body>تم حفظ الطالب <strong>{lastAddedStudent?.studentName}</strong> بنجاح!</Modal.Body>
+        <Modal.Footer>
+          <Button variant="success" onClick={handleCloseModal}>إغلاق</Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showAttachmentsModal} onHide={handleCloseAttachmentsModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>ملفات الطالب</Modal.Title>
+        </Modal.Header>
         <Modal.Body>
-          تم حفظ الطالب <strong>{lastAddedStudent?.studentName}</strong> بنجاح!
+          {selectedAttachments.length > 0 ? (
+            selectedAttachments.map((file, index) => (
+              <div key={index} className="file-item">
+                <a href={file.fileData} download={file.fileName}>
+                  <button className="download-btn">تحميل {file.fileName}</button>
+                </a>
+              </div>
+            ))
+          ) : (
+            <p>لا توجد ملفات للطالب.</p>
+          )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="success" onClick={handleCloseModal}>
-            إغلاق
-          </Button>
+          <Button variant="secondary" onClick={handleCloseAttachmentsModal}>إغلاق</Button>
         </Modal.Footer>
       </Modal>
     </Container>

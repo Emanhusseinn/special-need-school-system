@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
-import { saveToLocalStorage, getFromLocalStorage } from "../utils/localStorage";
+import { saveToLocalStorage } from "../utils/localStorage";
 import { BsPersonCircle } from "react-icons/bs"; // Student icon for placeholder
 
 const InputForm = ({ onAddStudent }) => {
@@ -20,11 +20,11 @@ const InputForm = ({ onAddStudent }) => {
     teacherName: "",
     studentId: "",
     therapy: "",
-    attachedFile: null,
-    attachedFileName: "",
+    attachedFiles: [], // Change to array for multiple files
     studentPhoto: null,
     studentPhotoName: ""
   });
+  
 
   // Handle input changes
   const handleChange = (e) => {
@@ -35,19 +35,29 @@ const InputForm = ({ onAddStudent }) => {
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
+    const files = Array.from(e.target.files); // Convert FileList to Array
+    const updatedFiles = files.map(file => {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({
-          ...formData,
-          attachedFile: reader.result, // base64 file data
-          attachedFileName: file.name
-        });
-      };
-      reader.readAsDataURL(file); // Convert file to base64 string
-    }
+      reader.readAsDataURL(file);
+      return new Promise(resolve => {
+        reader.onloadend = () => {
+          resolve({
+            fileName: file.name,
+            fileData: reader.result
+          });
+        };
+      });
+    });
+  
+    // Wait for all files to be read
+    Promise.all(updatedFiles).then(fileDataArray => {
+      setFormData(prevFormData => ({
+        ...prevFormData,
+        attachedFiles: [...prevFormData.attachedFiles, ...fileDataArray] // Append new files
+      }));
+    });
   };
+  
 
   const handlePhotoChange = (e) => {
     const photo = e.target.files[0];
@@ -63,19 +73,14 @@ const InputForm = ({ onAddStudent }) => {
       reader.readAsDataURL(photo); // Convert photo to base64 string
     }
   };
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    const existingStudents = getFromLocalStorage("students") || [];
-    const updatedStudents = [...existingStudents, formData];
-
-    // Save to local storage
-    saveToLocalStorage("students", updatedStudents);
-
-    // Trigger the update in parent (App.js)
-    onAddStudent(updatedStudents);
-
-    // Reset the form after submission
+  
+    // Save to Supabase and local state
+    saveToLocalStorage("students", formData);
+    onAddStudent(formData);
+  
+    // Reset form data
     setFormData({
       studentName: "",
       planType: "",
@@ -97,6 +102,7 @@ const InputForm = ({ onAddStudent }) => {
       studentPhotoName: ""
     });
   };
+  
 
   return (
     // <Container>
@@ -279,13 +285,15 @@ const InputForm = ({ onAddStudent }) => {
       <Row>
       <Col md={6}>
       <Form.Group controlId="fileUpload">
-        <Form.Label>إرفاق تقارير</Form.Label>
-        <Form.Control
-          type="file"
-          onChange={handleFileChange}
-          accept=".pdf, .doc, .docx, .png, .jpg, .jpeg, .gif, .bmp"
-        />
-      </Form.Group>
+  <Form.Label>إرفاق تقارير</Form.Label>
+  <Form.Control
+    type="file"
+    onChange={handleFileChange}
+    accept=".pdf, .doc, .docx, .png, .jpg, .jpeg, .gif, .bmp"
+    multiple // Allow multiple files
+  />
+</Form.Group>
+
       </Col>
 
       

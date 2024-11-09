@@ -131,10 +131,31 @@
   font-size: 16px;
   text-transform: uppercase;
   transition: background-color 0.2s;
+  margin-bottom: 0;
+  text-align: center;
+  width: 100%;
 }
 
 .download-btn:hover {
   background-color: #2b307f;
+}
+
+.count-btn {
+  background-color: #7575b5;
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  text-transform: uppercase;
+  transition: background-color 0.2s;
+  margin-bottom: 0;
+  text-align: center;
+  font-weight: bold;
+}
+.search-bar{
+  padding: 1rem 0 2rem;
 }
 .plan-type{
     display: flex;
