@@ -221,8 +221,8 @@ function App() {
                   <div className="student-card">
                                         {/* Edit and Delete Buttons */}
                   <div className="student-actions">
-                    <button><MdDelete  onClick={() => handleDeleteStudent(student.id)}/> حذف الطالب</button>
-                    <button> <MdEdit  onClick={() => handleEditStudent(student)}/> تعديل الطالب</button>
+                    <button  onClick={() => handleDeleteStudent(student.id)}><MdDelete/> حذف الطالب</button>
+                    <button  onClick={() => handleEditStudent(student)}> <MdEdit/> تعديل الطالب</button>
                       
                  
                     </div>
