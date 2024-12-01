@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Modal, Button, Row, Col, Form, Nav } from 'react-bootstrap';
 import InputForm from './pages/InputForm';
 import LoginPage from './LoginPage';
-import { getFromLocalStorage, getIsLoggedIn, setIsSignedIn } from './utils/localStorage';
+import { getFromLocalStorage, getIsLoggedIn, setIsSignedIn,saveToLocalStorage } from './utils/localStorage';
 import { BsPersonCircle } from "react-icons/bs";
 import { updateStudent, deleteStudent } from './utils/localStorage'; // Import new utilities
 import * as XLSX from "xlsx";
@@ -107,13 +107,39 @@ function App() {
     setIsLoggedIn(false);
     setIsSignedIn('isLoggedIn', "false"); // Clear login status
   };
-
-  // Handle adding a new student
-  const handleAddStudent = (newStudent) => {
-    setStudents(prev => [newStudent, ...prev]);
-    setShowModal(true);
-    setActiveTab("list");
+  const refreshStudents = async () => {
+    try {
+      // Fetch updated student data from your backend or localStorage
+      const fetchedStudents = await getFromLocalStorage("students", setStudents);
+      if (fetchedStudents) {
+        setStudents(fetchedStudents); // Update the state with the new data
+      }
+    } catch (error) {
+      console.error("Error refreshing students:", error);
+      alert("حدث خطأ أثناء تحديث قائمة الطلاب.");
+    }
   };
+  
+  // Handle adding a new student
+  const handleAddStudent = async (newStudent) => {
+    setLoading(true); // Show spinner while saving
+    try {
+      await saveToLocalStorage("students", newStudent); // Save to Supabase
+      await refreshStudents(); // Refresh the list dynamically
+      setShowModal(true);
+      setActiveTab("list"); // Switch to the list tab
+    } catch (error) {
+      console.error("Error adding student:", error);
+      alert("حدث خطأ أثناء إضافة الطالب");
+    } finally {
+      setLoading(false); // Hide spinner
+    }
+  };
+  
+  useEffect(() => {
+    refreshStudents();
+  }, []);
+  
 
   const handleCloseModal = () => setShowModal(false);
 
@@ -226,6 +252,11 @@ function App() {
           </Form.Group>
           <div className="student-list">
             <p className="count-btn">عدد الطلاب: {filteredStudents.length}</p>
+            {filteredStudents.length === 0 ? (
+        <div className="spinner-overlay">
+          <Spinner animation="border" variant="primary" />
+        </div>
+      ) : (
             <Row>
               {filteredStudents.map((student, index) => (
                 <Col md={6} sm={12} key={index} className="mb-4">
@@ -289,6 +320,7 @@ function App() {
                 </Col>
               ))}
             </Row>
+            )}
           </div>
         </div>
       )}

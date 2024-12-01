@@ -85,8 +85,7 @@ const InputForm = ({ onAddStudent, editMode, currentStudent, onSaveStudent, onCa
     if (editMode) {
       onSaveStudent(formData); // Call the save function
     } else {
-      saveToLocalStorage("students", formData); // Add new student
-      onAddStudent(formData);
+      onAddStudent(formData); // Add new student
     }
   
     // Reset the form
@@ -110,6 +109,7 @@ const InputForm = ({ onAddStudent, editMode, currentStudent, onSaveStudent, onCa
       studentPhotoName: "",
     });
   };
+  
   
 
   return (
