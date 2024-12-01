@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
-import { saveToLocalStorage } from "../utils/localStorage";
 import { BsPersonCircle } from "react-icons/bs"; // Student icon for placeholder
 
 const InputForm = ({ onAddStudent, editMode, currentStudent, onSaveStudent, onCancelEdit }) => {

@@ -171,6 +171,7 @@ function App() {
   const handleCancelEdit = () => {
     setEditMode(false);
     setCurrentStudent(null);
+    setActiveTab("list");
   };
 
   const handleDeleteStudent = async (studentId) => {
