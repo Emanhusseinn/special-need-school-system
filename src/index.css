@@ -17,17 +17,61 @@
 .form-btn{
     text-align: center;
 }
-.form-btn .save-btn{
+.form-btn .save-btn, .cancle-btn{
   background: #e6e6f5;
   color: black;
-  font-weight: bold;
-  margin-top: 2rem;
-  border: 3px solid #dadaff;
-  padding: 11px;
+  font-weight: bold !important;
+  border: 3px solid #dadaff !important;
+  padding: 11px !important;
   width: 30%;
-  border-radius: 11px;
+  border-radius: 11px !important;
+  margin: 2rem 12px;
 }
 
+.download-btn {
+  margin-left: 5px;
+  background-color: #17a2b8;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.download-btn:hover {
+  background-color: #138496;
+}
+.student-actions {
+  display: flex;
+  justify-content: space-around;
+  background: white;
+  margin: 6px 0 18px 0;
+  padding: 11px;
+  border-radius: 15px;
+}
+
+.student-actions button {
+  background: #ffffff;
+  border: none;
+  margin: 0 14px;
+  /* font-size: 18px; */
+  font-weight: bold;
+  color: #7575b5;
+}
+
+.student-actions button:hover  {
+    background: #dadaff;
+    border-radius: 6px;
+}
+
+.student-actions button svg {
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+}
+
+.student-actions button svg path{
+  color: #7575b5;
+}
 .nav-system{
   background: #dadaff;
   padding: 20px 20px 0;
@@ -61,7 +105,7 @@
   background: #f3f3f9;
   display: flex;
   justify-content: space-between; /* Create space between student info and file download */
-  padding: 1.5rem;
+  padding: 0 1.5rem 1.5rem;
   border: 3px solid #dadaff;
   border-radius: 15px;
   margin-top: 1rem;
@@ -226,7 +270,23 @@
     display: flex;
     align-items: center;
     gap:1rem;
-    /* justify-content: space-evenly; */
+    justify-content: space-between;
+}
+
+.FaDownload svg {
+width: 30px;
+height: 30px;
+margin: 0 19px 19px;
+cursor: pointer;
+}
+.FaDownload svg path{
+  color: #3ca4dc;
+}
+.download-info{
+  display: flex;
+  align-items: center;
+  gap:1rem;
+
 }
 @media screen and (max-width:580px) {
   .student-card {

@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
 import { saveToLocalStorage } from "../utils/localStorage";
 import { BsPersonCircle } from "react-icons/bs"; // Student icon for placeholder
 
-const InputForm = ({ onAddStudent }) => {
+const InputForm = ({ onAddStudent, editMode, currentStudent, onSaveStudent, onCancelEdit }) => {
   // State for storing form input
   const [formData, setFormData] = useState({
     studentName: "",
@@ -25,8 +25,14 @@ const InputForm = ({ onAddStudent }) => {
     studentPhotoName: ""
   });
   
+ useEffect(() => {
+  if (editMode && currentStudent) {
+    setFormData(currentStudent);
+  }
+}, [editMode, currentStudent]);
 
-  // Handle input changes
+
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -76,11 +82,14 @@ const InputForm = ({ onAddStudent }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
   
-    // Save to Supabase and local state
-    saveToLocalStorage("students", formData);
-    onAddStudent(formData);
+    if (editMode) {
+      onSaveStudent(formData); // Call the save function
+    } else {
+      saveToLocalStorage("students", formData); // Add new student
+      onAddStudent(formData);
+    }
   
-    // Reset form data
+    // Reset the form
     setFormData({
       studentName: "",
       planType: "",
@@ -96,10 +105,9 @@ const InputForm = ({ onAddStudent }) => {
       teacherName: "",
       studentId: "",
       therapy: "",
-      attachedFile: null,
-      attachedFileName: "",
+      attachedFiles: [],
       studentPhoto: null,
-      studentPhotoName: ""
+      studentPhotoName: "",
     });
   };
   
@@ -414,9 +422,18 @@ const InputForm = ({ onAddStudent }) => {
 
       {/* Submit Button */}
       <div className="form-btn">
+        {/* Add a Cancel button if in edit mode */}
+      {editMode && (
+        <Button variant="secondary" onClick={onCancelEdit} className="cancle-btn">
+          إلغاء
+        </Button>
+      )}
       <Button variant="primary" type="submit" className="save-btn">
+        {editMode ? "حفظ التعديلات" : "إضافة الطالب"}
+      </Button>
+      {/* <Button variant="primary" type="submit" >
         حفظ الطالب
-      </Button>        
+      </Button>         */}
       </div>
 
     </Form>

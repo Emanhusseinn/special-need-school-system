@@ -2,14 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Container, Modal, Button, Row, Col, Form, Nav } from 'react-bootstrap';
 import InputForm from './pages/InputForm';
 import LoginPage from './LoginPage';
-import { getFromLocalStorage, saveToLocalStorage, getIsLoggedIn, setIsSignedIn } from './utils/localStorage';
+import { getFromLocalStorage, getIsLoggedIn, setIsSignedIn } from './utils/localStorage';
 import { BsPersonCircle } from "react-icons/bs";
 import { updateStudent, deleteStudent } from './utils/localStorage'; // Import new utilities
+import * as XLSX from "xlsx";
+import { FaDownload } from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
+import { MdEdit } from "react-icons/md";
 
 function App() {
   const [students, setStudents] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [lastAddedStudent, setLastAddedStudent] = useState(null);
+  const [lastAddedStudent] = useState(null);
   const [activeTab, setActiveTab] = useState('add');
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -24,6 +28,59 @@ function App() {
     setShowAttachmentsModal(true);
   };
 
+
+  const handleDownloadExcelFile = (student) => {
+    try {
+      // Prepare the student data as an array of objects
+      const studentData = [
+        { Key: "اسم الطالب", Value: student.studentName || "غير متوفر" },
+        { Key: "رقم الطالب", Value: student.studentId || "غير متوفر" },
+        { Key: "نوع الخطة", Value: student.planType || "غير متوفر" },
+        { Key: "نوع الإعاقة", Value: student.disabilityType || "غير متوفر" },
+        { Key: "المواصلات", Value: student.transportation || "غير متوفر" },
+        { Key: "الصف", Value: student.classLevel || "غير متوفر" },
+        { Key: "تاريخ الميلاد", Value: student.birthDate || "غير متوفر" },
+        { Key: "الخدمات المساندة", Value: student.therapy || "غير متوفر" },
+        { Key: "اسم المدرسة", Value: student.schoolName || "غير متوفر" },
+        { Key: "اسم المعلم المشرف", Value: student.teacherName || "غير متوفر" },
+      ];
+  
+      // Convert the data to a worksheet
+      const worksheet = XLSX.utils.json_to_sheet(studentData, {
+        header: ["Key", "Value"],
+      });
+  
+      // Create a workbook and append the worksheet
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Student Data");
+  
+      // Export the workbook as a file
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+  
+      const blob = new Blob([excelBuffer], {
+        type: "application/octet-stream",
+      });
+  
+      // Create a download link
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${student.studentName || "student"}_data.xlsx`;
+  
+      // Trigger the download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error generating Excel file:", error);
+      alert("حدث خطأ أثناء إنشاء ملف الإكسل");
+    }
+  };
+  
+  
+  
   // Function to close the modal
   const handleCloseAttachmentsModal = () => setShowAttachmentsModal(false);
 
@@ -61,17 +118,31 @@ function App() {
   // Start edit mode with selected student data
   const handleEditStudent = (student) => {
     setEditMode(true);
-    setCurrentStudent(student);
-    setActiveTab("add");
+    setCurrentStudent(student); // Pass the student data
+    setActiveTab("add"); // Switch to the form tab
   };
 
   // Save updated student data
   const handleSaveStudent = async (updatedStudent) => {
-    await updateStudent('students', updatedStudent.id, updatedStudent);
-    setStudents(prev => prev.map(stud => stud.id === updatedStudent.id ? updatedStudent : stud));
+    try {
+      await updateStudent("students", updatedStudent.id, updatedStudent); // Update in Supabase
+      setStudents((prev) =>
+        prev.map((stud) => (stud.id === updatedStudent.id ? updatedStudent : stud))
+      );
+      alert("تم تحديث بيانات الطالب بنجاح");
+    } catch (error) {
+      console.error("Error updating student:", error);
+      alert("حدث خطأ أثناء تحديث بيانات الطالب");
+    }
+    setEditMode(false); // Exit edit mode
+    setCurrentStudent(null);
+  };
+
+  const handleCancelEdit = () => {
     setEditMode(false);
     setCurrentStudent(null);
   };
+
   const handleDeleteStudent = async (studentId) => {
     console.log("Attempting to delete student with ID:", studentId);
   
@@ -121,13 +192,13 @@ function App() {
       {activeTab === 'add' && (
         <div>
           <h1>{editMode ? "تعديل الطالب" : "إضافة طالب"}</h1>
-          <InputForm 
-            onAddStudent={handleAddStudent} 
-            editMode={editMode}
-            currentStudent={currentStudent}
-            onSaveStudent={handleSaveStudent}
-            onCancelEdit={() => { setEditMode(false); setCurrentStudent(null); }}
-          />
+<InputForm 
+  onAddStudent={handleAddStudent}          // This is the function to handle adding a new student.
+  editMode={editMode}                      // A boolean indicating whether the form is in edit mode.
+  currentStudent={currentStudent}          // The student data to pre-fill the form when in edit mode.
+  onSaveStudent={handleSaveStudent}        // The function to handle saving the updated student data.
+  onCancelEdit={handleCancelEdit}
+/>
         </div>
       )}
 
@@ -148,8 +219,16 @@ function App() {
               {filteredStudents.map((student, index) => (
                 <Col md={6} sm={12} key={index} className="mb-4">
                   <div className="student-card">
+                                        {/* Edit and Delete Buttons */}
+                  <div className="student-actions">
+                    <button><MdDelete  onClick={() => handleDeleteStudent(student.id)}/> حذف الطالب</button>
+                    <button> <MdEdit  onClick={() => handleEditStudent(student)}/> تعديل الطالب</button>
+                      
+                 
+                    </div>
                     <div className="student-details">
                       <div className="photo-name">
+                        <div className='download-info'>
                         <div className="photo-upload-circle-display">
                           {student.studentPhoto ? (
                             <img
@@ -161,7 +240,10 @@ function App() {
                             <BsPersonCircle className="icon-placeholder" />
                           )}
                         </div>
-                        <p className="student-name">{student.studentName}</p>
+                        <p className="student-name">{student.studentName}</p></div>
+                        <div className="FaDownload">
+                      <FaDownload onClick={() => handleDownloadExcelFile(student)}/>
+                    </div>
                       </div>
 
                       <div className="student-info">
@@ -192,12 +274,6 @@ function App() {
                     ) : (
                       <p className="count-btn">لا يوجد ملفات للطالب</p>
                     )}
-
-                    {/* Edit and Delete Buttons */}
-                    {/* <div className="student-actions">
-                      <Button variant="warning" onClick={() => handleEditStudent(student)}>تعديل</Button>
-                      <Button variant="danger" onClick={() => handleDeleteStudent(student.id)}>حذف</Button>
-                    </div> */}
                   </div>
                 </Col>
               ))}
