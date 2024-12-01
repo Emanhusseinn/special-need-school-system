@@ -44,6 +44,7 @@ function App() {
         { Key: "الخدمات المساندة", Value: student.therapy || "غير متوفر" },
         { Key: "اسم المدرسة", Value: student.schoolName || "غير متوفر" },
         { Key: "اسم المعلم المشرف", Value: student.teacherName || "غير متوفر" },
+        { Key: "رقم التواصل", Value: student.contactNumber || "غير متوفر" },
       ];
   
       // Convert the data to a worksheet
@@ -303,6 +304,7 @@ function App() {
                           <div><strong>اسم المدرسة:</strong> {student.schoolName}</div>
                           <div><strong>اسم المعلم المشرف:</strong> {student.teacherName}</div>
                           <div><strong>رقم الطالب:</strong> {student.studentId}</div>
+                          <p><strong>رقم التواصل:</strong> {student.contactNumber}</p>
                         </div>
                       </div>
                     </div>

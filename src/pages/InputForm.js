@@ -21,7 +21,8 @@ const InputForm = ({ onAddStudent, editMode, currentStudent, onSaveStudent, onCa
     therapy: "",
     attachedFiles: [], // Change to array for multiple files
     studentPhoto: null,
-    studentPhotoName: ""
+    studentPhotoName: "",
+    contactNumber: "", 
   });
   
  useEffect(() => {
@@ -106,6 +107,7 @@ const InputForm = ({ onAddStudent, editMode, currentStudent, onSaveStudent, onCa
       attachedFiles: [],
       studentPhoto: null,
       studentPhotoName: "",
+      contactNumber: "", 
     });
   };
   
@@ -389,7 +391,7 @@ const InputForm = ({ onAddStudent, editMode, currentStudent, onSaveStudent, onCa
 
       {/* School Name */}
       <Row>
-      <Col md={6}>
+      <Col md={4}>
       <Form.Group controlId="schoolName">
         <Form.Label>اسم المدرسة</Form.Label>
         <Form.Control
@@ -403,7 +405,7 @@ const InputForm = ({ onAddStudent, editMode, currentStudent, onSaveStudent, onCa
       </Form.Group>
       </Col>
       {/* Teacher Name */}
-      <Col md={6}>
+      <Col md={4}>
       <Form.Group controlId="teacherName">
         <Form.Label>اسم المعلم المشرف</Form.Label>
         <Form.Control
@@ -416,6 +418,23 @@ const InputForm = ({ onAddStudent, editMode, currentStudent, onSaveStudent, onCa
         />
       </Form.Group>
       </Col>
+
+  <Col md={4}>
+    <Form.Group controlId="contactNumber">
+      <Form.Label>رقم التواصل</Form.Label>
+      <Form.Control
+        type="text"
+        placeholder="أدخل رقم التواصل"
+        name="contactNumber"
+        value={formData.contactNumber || ""}
+        onChange={handleChange}
+        required
+        pattern="^07[789]\d{7}$" // Regex for Jordanian phone numbers
+        title="يجب أن يكون الرقم بصيغة 07XXXXXXXX"
+      />
+    </Form.Group>
+  </Col>
+
       </Row>
 
 
