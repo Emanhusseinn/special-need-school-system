@@ -304,7 +304,7 @@ function App() {
                           <div><strong>اسم المدرسة:</strong> {student.schoolName}</div>
                           <div><strong>اسم المعلم المشرف:</strong> {student.teacherName}</div>
                           <div><strong>رقم الطالب:</strong> {student.studentId}</div>
-                          <p><strong>رقم التواصل:</strong> {student.contactNumber}</p>
+                          <div><strong>رقم التواصل:</strong> {student.contactNumber}</div>
                         </div>
                       </div>
                     </div>

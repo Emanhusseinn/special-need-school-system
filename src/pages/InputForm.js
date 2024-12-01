@@ -429,8 +429,6 @@ const InputForm = ({ onAddStudent, editMode, currentStudent, onSaveStudent, onCa
         value={formData.contactNumber || ""}
         onChange={handleChange}
         required
-        pattern="^07[789]\d{7}$" // Regex for Jordanian phone numbers
-        title="يجب أن يكون الرقم بصيغة 07XXXXXXXX"
       />
     </Form.Group>
   </Col>
