@@ -9,6 +9,7 @@ import * as XLSX from "xlsx";
 import { FaDownload } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import { MdEdit } from "react-icons/md";
+import { Spinner } from "react-bootstrap"; // Import Spinner from Bootstrap
 
 function App() {
   const [students, setStudents] = useState([]);
@@ -21,7 +22,7 @@ function App() {
   const [selectedAttachments, setSelectedAttachments] = useState([]);
   const [editMode, setEditMode] = useState(false);
   const [currentStudent, setCurrentStudent] = useState(null);
-
+  const [loading, setLoading] = useState(false); // Add loading state
   // Function to open the modal and set the selected attachments
   const handleShowAttachments = (attachments) => {
     setSelectedAttachments(attachments);
@@ -111,6 +112,7 @@ function App() {
   const handleAddStudent = (newStudent) => {
     setStudents(prev => [newStudent, ...prev]);
     setShowModal(true);
+    setActiveTab("list");
   };
 
   const handleCloseModal = () => setShowModal(false);
@@ -129,7 +131,9 @@ function App() {
       setStudents((prev) =>
         prev.map((stud) => (stud.id === updatedStudent.id ? updatedStudent : stud))
       );
+
       alert("تم تحديث بيانات الطالب بنجاح");
+      setActiveTab("list");
     } catch (error) {
       console.error("Error updating student:", error);
       alert("حدث خطأ أثناء تحديث بيانات الطالب");
@@ -144,6 +148,7 @@ function App() {
   };
 
   const handleDeleteStudent = async (studentId) => {
+    setLoading(true); // Show spinner
     console.log("Attempting to delete student with ID:", studentId);
   
     // Perform deletion
@@ -156,10 +161,11 @@ function App() {
       getFromLocalStorage('students', (fetchedStudents) => {
         setStudents(fetchedStudents);
         console.log("Data refreshed after deletion:", fetchedStudents);
+        setLoading(false); // hide spinner
       });
     } else {
       console.error("Failed to delete student. Error:", response.error);
-      alert("Failed to delete student due to an error. Please try again.");
+      alert("Failed to delete student due to an error. Please reload  .");
     }
   };
   
@@ -177,6 +183,11 @@ function App() {
 
   return (
     <Container>
+       {loading && ( // Conditionally render the spinner
+        <div className="spinner-overlay">
+          <Spinner animation="border" variant="primary" />
+        </div>
+      )}
       <Nav variant="tabs" activeKey={activeTab} onSelect={(selectedKey) => setActiveTab(selectedKey)} className='nav-system'>
         <Nav.Item>
           <Nav.Link eventKey="add">{editMode ? "تعديل طالب" : "إضافة طالب"}</Nav.Link>

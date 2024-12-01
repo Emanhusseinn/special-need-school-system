@@ -13,16 +13,21 @@ export const saveToLocalStorage = async (id, studentData) => {
 
 export const getFromLocalStorage = async (key, setStudentData) => {
   try {
-    const { data, error } = await supabase.from('students').select('*');
+    const { data, error } = await supabase.from("students").select("*");
     if (error) throw error;
 
-    const unwrappedData = data.map(item => ({ id: item.id, ...item.data })); // Extract `data` field and add `id`
+    const unwrappedData = data.map((item) => ({
+      id: item.id, // Ensure ID is included
+      ...item.data, // Extract student details
+    }));
+
     console.log("Fetched students data:", unwrappedData);
     setStudentData(unwrappedData);
   } catch (error) {
     console.error("Error fetching students:", error);
   }
 };
+
   
 
 
